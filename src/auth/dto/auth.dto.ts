@@ -45,3 +45,13 @@ export class CreateUserDto {
   @IsNotEmpty()
   role: 'STUDENT' | 'INSTRUCTOR';
 }
+
+export class LoginUserDto {
+  @IsEmail()
+  @IsNotEmpty()
+  email: string;
+
+  @IsString()
+  @IsNotEmpty()
+  password: string;
+}

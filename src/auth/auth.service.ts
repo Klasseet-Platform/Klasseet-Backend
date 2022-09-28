@@ -7,7 +7,8 @@ import {
 } from '@prisma/client/runtime';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateUserDto, LoginUserDto } from './dto';
+// import { LoginUserDto } from './dto/login.dto';
+import { CreateUserDto, LoginUserDto } from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -43,7 +44,7 @@ export class AuthService {
           'User with these credentials already exists',
         );
       } else if (error instanceof PrismaClientValidationError) {
-        throw new ForbiddenException('');
+        throw new ForbiddenException('Invalid credentials');
       } else {
         return error;
       }
