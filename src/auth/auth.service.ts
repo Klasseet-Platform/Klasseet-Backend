@@ -7,7 +7,6 @@ import {
 } from '@prisma/client/runtime';
 import * as argon from 'argon2';
 import { PrismaService } from '../prisma/prisma.service';
-// import { LoginUserDto } from './dto/login.dto';
 import { CreateUserDto, LoginUserDto } from './dto/auth.dto';
 
 @Injectable()
@@ -38,7 +37,6 @@ export class AuthService {
         success: true,
       };
     } catch (error) {
-      console.log(error);
       if (error instanceof PrismaClientKnownRequestError) {
         throw new ForbiddenException(
           'User with these credentials already exists',
@@ -46,13 +44,23 @@ export class AuthService {
       } else if (error instanceof PrismaClientValidationError) {
         throw new ForbiddenException('Invalid credentials');
       } else {
-        return error;
+        throw error;
       }
     }
   }
 
-  login(dto: LoginUserDto) {
-    console.log(dto);
-    return 'user logged in successfully';
+  async login(dto: LoginUserDto) {
+    await this.prisma.$connect();
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    const pwdMatch = await argon.verify(user.hash, dto.password);
+    if (!pwdMatch) {
+      throw new ForbiddenException(`User with this credentials doesn't exist`);
+    } else {
+      return { ...user };
+    }
   }
 }
