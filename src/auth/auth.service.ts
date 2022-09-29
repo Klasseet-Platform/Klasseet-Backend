@@ -26,9 +26,7 @@ export class AuthService {
       },
     });
     if (checkIfUserExist) {
-      throw new ForbiddenException(
-        'User with these credentials already exists',
-      );
+      throw new ForbiddenException('User with these credentials already exist');
     }
     try {
       const user = await this.prisma.user.create({
@@ -49,7 +47,7 @@ export class AuthService {
     } catch (error) {
       if (error instanceof PrismaClientKnownRequestError) {
         throw new ForbiddenException(
-          'User with these credentials already exists',
+          'User with these credentials already exist',
         );
       } else if (error instanceof PrismaClientValidationError) {
         throw new ForbiddenException('Invalid credentials');
@@ -67,7 +65,7 @@ export class AuthService {
       },
     });
     const pwdMatch = await argon.verify(user.hash, dto.password);
-    if (pwdMatch) {
+    if (!pwdMatch) {
       throw new ForbiddenException(`User with this credentials doesn't exist`);
     } else {
       const payload = { ...user };
