@@ -60,7 +60,13 @@ export class AuthService {
     if (!pwdMatch) {
       throw new ForbiddenException(`User with this credentials doesn't exist`);
     } else {
-      return { ...user };
+      const payload = { ...user };
+      const secret = this.configService.get('JWT_SECRET');
+      const token = await this.jwtService.signAsync(payload, {
+        expiresIn: '24h',
+        secret: secret,
+      });
+      return { accessToken: token };
     }
   }
 }
