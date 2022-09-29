@@ -20,6 +20,16 @@ export class AuthService {
   async signUp(dto: CreateUserDto) {
     await this.prisma.$connect();
     const hash = await argon.hash(dto.password);
+    const checkIfUserExist = await this.prisma.user.findUnique({
+      where: {
+        email: dto.email,
+      },
+    });
+    if (checkIfUserExist) {
+      throw new ForbiddenException(
+        'User with these credentials already exists',
+      );
+    }
     try {
       const user = await this.prisma.user.create({
         data: {
@@ -57,7 +67,7 @@ export class AuthService {
       },
     });
     const pwdMatch = await argon.verify(user.hash, dto.password);
-    if (!pwdMatch) {
+    if (pwdMatch) {
       throw new ForbiddenException(`User with this credentials doesn't exist`);
     } else {
       const payload = { ...user };
